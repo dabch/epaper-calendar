@@ -3,8 +3,12 @@
 from icalevents.icalevents import events
 from dateutil.parser import parse
 import datetime
+import configparser
 
-url = ''
+conf = configparser.ConfigParser()
+conf.read("config.ini")
+
+url = conf['DEFAULT']['URL']
 
 start = datetime.datetime.now()
 end = start + datetime.timedelta(days=100)
