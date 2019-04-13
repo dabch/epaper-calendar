@@ -104,9 +104,9 @@ def draw_short_event(d, e):
     
     """
     x_start = offset_left + bar_left + e["day"] * per_day + 1
-    y_start = offset_top + bar_top + math.floor((e["start_h"] - BEGIN_DAY + e["start_min"] / 60) * per_hour)
+    y_start = offset_top + bar_top + math.floor((e["start"] - (BEGIN_DAY * 60)) * per_hour / 60)
     x_end = x_start + per_day - 2 # TODO collision management
-    y_end = offset_top + bar_top + math.floor((e["end_h"] - BEGIN_DAY + e["end_min"] / 60) * per_hour)
+    y_end = offset_top + bar_top + math.floor((e["end"] - (BEGIN_DAY * 60)) * per_hour / 60)
     d.rectangle((x_start, y_start, x_end, y_end), outline=0, fill=200)
     
     print(e)
@@ -137,7 +137,7 @@ def detect_collisions(drawables):
     
     collisions = [[[] for x in range(len(drawables))] for y in range(len(drawables))]
     for e in drawables:
-
+        pass
 
 def split_events(evs):
     drawables = [[] for x in range(DAYS)]
@@ -188,36 +188,31 @@ def split_events(evs):
                     if start.hour >= END_DAY:
                         continue
                     elif start.hour < BEGIN_DAY:
-                        event["start_h"] = BEGIN_DAY
-                        event["start_min"] = 0
+                        event["start"] = BEGIN_DAY * 60 
                     else:
-                        event["start_h"] = start.hour
-                        event["start_min"] = start.minute
+                        event["start"] = start.hour * 60 + start.minute
                 else: # any later iteration - event going on from midnight
-                    event["start_h"] = BEGIN_DAY
-                    event["start_min"] = 0
+                    event["start"] = BEGIN_DAY * 60
 
                 if day == start_day + days_duration - 1: # last iteration - real end time
                     if end.hour < BEGIN_DAY:
                         continue
                     elif end.hour >= END_DAY:
-                        event["end_h"] = END_DAY
-                        event["end_min"] = 0
+                        event["end"] = END_DAY * 60
                     else:
-                        event["end_h"] = end.hour
-                        event["end_min"] = end.minute
+                        event["end"] = end.hour * 60 + end.minute
                 else: # any earlier iteration - event going until end of day
-                    event["end_h"] = END_DAY
-                    event["end_min"] = 0
+                    event["end"] = END_DAY * 60
                 event["title"] = ev.summary
                 event["day"] = day
                 # check duration to prevent event from being too small
-                minutes_duration = event["end_h"] * 60 + event["end_min"] - event["start_h"] * 60 - event["start_min"]
+                minutes_duration = event["end"] - event["start"]
                 if minutes_duration < 60:
-                    if event["end_h"] + 1 >= END_DAY:
-                        event["start_h"] -= 1
+                    if event["end"] + 60 - minutes_duration >= END_DAY * 60:
+                        event["end"] = END_DAY * 60
+                        event["start"] = END_DAY * 60 - 60 
                     else:
-                        event["end_h"] += 1
+                        event["end"] += 60 - minutes_duration
                 #draw_short_event(d, event)
                 drawables[day].append(event)
     return (drawables, all_days)  
@@ -229,7 +224,7 @@ if __name__ == "__main__":
 
     prepare_grid(d)
     #draw_event(d, evs[1]) 
-    drawables, all_days = split_events(d, evs)
+    drawables, all_days = split_events(evs)
     for l in drawables:
         for e in l:
             draw_short_event(d, e)
