@@ -103,9 +103,9 @@ def draw_short_event(d, e):
     into several calls of draw_short_event and draw_allday_event by draw_event. 
     
     """
-    x_start = offset_left + bar_left + e["day"] * per_day + 1
+    x_start = offset_left + bar_left + e["day"] * per_day + e["column"] * per_day / e["max_collision"]
     y_start = offset_top + bar_top + math.floor((e["start"] - (BEGIN_DAY * 60)) * per_hour / 60)
-    x_end = x_start + per_day - 2 # TODO collision management
+    x_end = x_start + per_day / e["max_collision"]
     y_end = offset_top + bar_top + math.floor((e["end"] - (BEGIN_DAY * 60)) * per_hour / 60)
     d.rectangle((x_start, y_start, x_end, y_end), outline=0, fill=200)
     
@@ -134,10 +134,24 @@ def detect_collisions(drawables):
     for collisions, i.e. events that need to be drawn side by side. Returns the same
     list of events with two parameters added to each event: index to be drawn in and
     number of events at that point. """ 
-    
-    collisions = [[[] for x in range(len(drawables))] for y in range(len(drawables))]
+    min_base = BEGIN_DAY * 60 
+    minutes = [[] for x in range(hours_day * 60)]
+    indexes = [0] * (hours_day * 60)
     for e in drawables:
-        pass
+        e["column"] = 0
+        for minute in range(e["start"], e["end"]):
+            minutes[minute - min_base].append(e)
+            e["column"] = max(e["column"], indexes[minute - min_base])
+            indexes[minute - min_base] += 1
+
+    for e in drawables:
+        max_collision = 1 # max events in parallel - no collisions = 1
+        for minute in range(e["start"], e["end"]):
+            max_collision = max(max_collision, len(minutes[minute - min_base]))
+        e["max_collision"] = max_collision
+        print("{}: {}, {}".format(e["title"], max_collision, e["column"]))
+    return drawables
+
 
 def split_events(evs):
     drawables = [[] for x in range(DAYS)]
@@ -226,6 +240,7 @@ if __name__ == "__main__":
     #draw_event(d, evs[1]) 
     drawables, all_days = split_events(evs)
     for l in drawables:
+        l = detect_collisions(l)
         for e in l:
             draw_short_event(d, e)
     im.save(open("out.jpg", "w+"))
