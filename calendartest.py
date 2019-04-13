@@ -4,6 +4,7 @@ from icalevents.icalevents import events
 from dateutil.parser import parse
 import datetime
 import configparser
+import pytz
 
 import epd7in5
 from PIL import Image, ImageDraw, ImageFont
@@ -17,8 +18,9 @@ if __name__ == "__main__":
 
     epd = epd7in5.EPD()
 
-    start = datetime.datetime.now()
-    end = start + datetime.timedelta(days=100)
+    timezone = pytz.timezone("Europe/Berlin")
+    start = datetime.datetime.now(timezone).astimezone(timezone).replace(hour=8,minute=0)
+    end = start + datetime.timedelta(days=10)
 
     evs = events(url, start=start, end=end)
 
