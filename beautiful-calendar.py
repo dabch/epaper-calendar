@@ -145,6 +145,8 @@ def draw_event(d, ev):
         for day in range(start_day, start_day + days_duration):
             event = {}
             if day == start_day: # first iteration - real start time
+                if start.hour > END_DAY:
+                    continue
                 event["start_h"] = start.hour
                 event["start_min"] = start.minute
             else: # any later iteration - event going on from midnight
@@ -152,6 +154,8 @@ def draw_event(d, ev):
                 event["start_min"] = 0
 
             if day == start_day + days_duration - 1: # last iteration - real end time
+                if end.hour < BEGIN_DAY:
+                    continue
                 event["end_h"] = end.hour
                 event["end_min"] = end.minute
             else: # any earlier iteration - event going until end of day
