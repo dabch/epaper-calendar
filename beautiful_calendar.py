@@ -10,7 +10,7 @@ import ical_worker
 
 BEGIN_DAY = 8
 END_DAY = 24
-DAYS = 5
+DAYS = 4
 TIMEZONE = 'Europe/Berlin'
 
 width = epd7in5.EPD_WIDTH 
@@ -27,11 +27,13 @@ hours_day = END_DAY - BEGIN_DAY
 per_hour = math.floor((height - bar_top - offset_top) / hours_day)
 per_day = math.floor((width - bar_left - offset_left) / DAYS)
 
-text_size = 15
+headline_size = 15
+text_size = 12
 
+fheadline = ImageFont.truetype('/usr/share/fonts/truetype/lato/Lato-Light.ttf', headline_size)
 ftext = ImageFont.truetype('/usr/share/fonts/truetype/lato/Lato-Light.ttf', text_size)
-fawesome = ImageFont.truetype('fa-regular.otf', text_size)
-
+fbold = ImageFont.truetype('/usr/share/fonts/truetype/lato/Lato-Bold.ttf', text_size)
+#fawesome = ImageFont.truetype('fa-regular.otf', text_size)
 
 print("DAYS: {}".format(DAYS))
 print("hours_day: {}".format(hours_day))
@@ -57,9 +59,9 @@ def prepare_grid(d):
         # draw date headline
         day = ical_worker.basetime + datetime.timedelta(days=i)
         headline = day.strftime('%a, %d')
-        textsize_x = d.textsize(headline, ftext)[0]
+        textsize_x = d.textsize(headline, fheadline)[0]
         textoffs_x = math.floor((per_day - textsize_x) / 2)
-        d.text((x + textoffs_x, offset_top), headline, font=ftext) 
+        d.text((x + textoffs_x, offset_top), headline, font=fheadline) 
     
     # draw horizontal hour separators and hour numbers
     for i in range(0, hours_day):
@@ -71,7 +73,7 @@ def prepare_grid(d):
                 d.point([(j, y)])
         # draw the hour number
         textoffs_y = math.floor((per_hour - text_size) / 2)
-        d.text((offset_left, y + textoffs_y - 1), "%02d" % (BEGIN_DAY + i), font=ftext)
+        d.text((offset_left, y + textoffs_y - 1), "%02d" % (BEGIN_DAY + i), font=fheadline)
 
 def draw_short_event(d, e):
     """
@@ -80,14 +82,29 @@ def draw_short_event(d, e):
     Not to be used for drawing events manually, please use draw_event for that.
     
     This function cannot draw events lasting across midnight. Instead, such events are split up
-    into several calls of draw_short_event and draw_allday_event by draw_event. 
+    into several calls of draw_short_event and draw_allday_event.
     
     """
     x_start = offset_left + bar_left + e["day"] * per_day + e["column"] * per_day / e["max_collision"]
     y_start = offset_top + bar_top + math.floor((e["start"] - (BEGIN_DAY * 60)) * per_hour / 60)
-    x_end = x_start + per_day / e["max_collision"]
+    width = per_day / e["max_collision"]
     y_end = offset_top + bar_top + math.floor((e["end"] - (BEGIN_DAY * 60)) * per_hour / 60)
-    d.rectangle((x_start, y_start, x_end, y_end), outline=0, width=2, fill=200)
+    # clear the event's area and make the outline
+    d.rectangle((x_start, y_start, x_start + width, y_end), outline=0, width=2, fill=200)
+
+    textoffs_x = 5
+    textoffs_y = (per_hour - text_size) // 2 - 1
+    
+    fulltext = e["title"]
+    while d.textsize(fulltext, font=ftext)[0] > width - 2 * textoffs_x:
+        fulltext = fulltext[:-1]
+    if e["end"] - e["start"] >= 90:
+        begintext = "%02d:%02d" % (e["start"] // 60, e["start"] % 60)
+        endtext = "%02d:%02d" % (e["end"] // 60, e["end"] % 60)
+        fulltext += "\n%s-%s" % (begintext, endtext)
+    d.text((x_start + 5, y_start + textoffs_y), fulltext, font=ftext) 
+    print(fulltext)
+    #d.text((x_start + 5, y_start + text_size + textoffs_y), begintext + "-" + endtext, font=ftext) 
     
     print(e)
 
