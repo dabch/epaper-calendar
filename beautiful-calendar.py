@@ -101,15 +101,14 @@ def draw_short_event(d, e):
     
     This function cannot draw events lasting across midnight. Instead, such events are split up
     into several calls of draw_short_event and draw_allday_event by draw_event. 
-    day = 1
-    hour = 14
-    duration = 1.5
-    x = offset_left + bar_left + day * per_day
-    y = offset_top + bar_top + (hour - BEGIN_DAY) * per_hour
-    d.rectangle((x + 1, y, x + per_day - 1, y + math.floor(duration * per_hour)), outline=0, fill=200)
     
-
     """
+    x_start = offset_left + bar_left + e["day"] * per_day + 1
+    y_start = offset_top + bar_top + math.floor((e["start_h"] - BEGIN_DAY + e["start_min"] / 60) * per_hour)
+    x_end = x_start + per_day - 2 # TODO collision management
+    y_end = offset_top + bar_top + math.floor((e["end_h"] - BEGIN_DAY + e["end_min"] / 60) * per_hour)
+    d.rectangle((x_start, y_start, x_end, y_end), outline=0, fill=200)
+    
     print(e)
 
 def draw_allday_event():
@@ -145,10 +144,14 @@ def draw_event(d, ev):
         for day in range(start_day, start_day + days_duration):
             event = {}
             if day == start_day: # first iteration - real start time
-                if start.hour > END_DAY:
+                if start.hour >= END_DAY:
                     continue
-                event["start_h"] = start.hour
-                event["start_min"] = start.minute
+                elif start.hour < BEGIN_DAY:
+                    event["start_h"] = BEGIN_DAY
+                    event["start_min"] = 0
+                else:
+                    event["start_h"] = start.hour
+                    event["start_min"] = start.minute
             else: # any later iteration - event going on from midnight
                 event["start_h"] = BEGIN_DAY
                 event["start_min"] = 0
@@ -156,12 +159,24 @@ def draw_event(d, ev):
             if day == start_day + days_duration - 1: # last iteration - real end time
                 if end.hour < BEGIN_DAY:
                     continue
-                event["end_h"] = end.hour
-                event["end_min"] = end.minute
+                elif end.hour >= END_DAY:
+                    event["end_h"] = END_DAY
+                    event["end_min"] = 0
+                else:
+                    event["end_h"] = end.hour
+                    event["end_min"] = end.minute
             else: # any earlier iteration - event going until end of day
                 event["end_h"] = END_DAY
                 event["end_min"] = 0
             event["title"] = ev.summary
+            event["day"] = day
+            # check duration to prevent event from being too small
+            minutes_duration = event["end_h"] * 60 + event["end_min"] - event["start_h"] * 60 - event["start_min"]
+            if minutes_duration < 60:
+                if event["end_h"] + 1 >= END_DAY:
+                    event["start_h"] -= 1
+                else:
+                    event["end_h"] += 1
             draw_short_event(d, event)
     
 
