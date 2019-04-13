@@ -135,7 +135,28 @@ def draw_event(d, ev):
         draw_allday_event(d, ev)
     else:
         """ We will be drawing events that last across more than one day separately for
-        each day. """
+        each day. 
+        
+        variable explanations (this shit is complicated...)
+        days_duration: the number of days the event spans. For an event going from midnight
+                    to midnight, this would be 1. For an event going from 23:55 to 00:05 this
+                    would be 2.
+                    This reflects the actual properties of the event and NOT the number
+                    of days inside the calendar timeframe.
+        
+        start_day:  The index of the day on which the event starts, relative to our calendar
+                    timeframe. 0 is the first day shown on the calendar, 1 the second etc.
+                    start_day can be negative if the event has already started outside the
+                    calendar timeframe (e.g. two days ago, then it would be -2)
+
+        These two variables are then used to iterate over the intersection of the days that
+        the event spans and the days inside the calendar timeframe, with the loop counter
+        (named days) again being the current day's index relative to the calendar timeframe,
+        just as start_day.
+        So essentially we are iterating over range(start_day, start_day + days_duration), but
+        because calendars are a bitch it's more complicated. The min and max just make sure 
+        we only iterate over the days of the event that are in our calendar timeframe.
+        """
         days_duration = (end.date() - start.date() + datetime.timedelta(days=1)).days
         start_day = (start.date() - basetime.date()).days # the start day index on our calendar (starting at 0 for today)
         #if start.date() < basetime.date(): # i.e. if event has started already
