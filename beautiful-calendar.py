@@ -107,7 +107,7 @@ def draw_short_event(d, e):
     y_start = offset_top + bar_top + math.floor((e["start"] - (BEGIN_DAY * 60)) * per_hour / 60)
     x_end = x_start + per_day / e["max_collision"]
     y_end = offset_top + bar_top + math.floor((e["end"] - (BEGIN_DAY * 60)) * per_hour / 60)
-    d.rectangle((x_start, y_start, x_end, y_end), outline=0, fill=200)
+    d.rectangle((x_start, y_start, x_end, y_end), outline=0, width=2, fill=200)
     
     print(e)
 
