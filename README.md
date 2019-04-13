@@ -7,4 +7,4 @@ The calendar data is pulled from the internet via an iCal Link. This link has to
 [DEFAULT]
 URL=https://url.com/calendar/123
 ```
-Replace the URL with you calendar's file and place it alongside the python files.
+Replace the URL with you calendar's URL and place it alongside the python files.
