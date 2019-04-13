@@ -51,7 +51,7 @@ conf.read("config.ini")
 url = conf['DEFAULT']['URL']
 
 
-start = datetime.datetime.now()
+start = basetime.replace(hour=BEGIN_DAY,minute=0)
 end = start + datetime.timedelta(days=10)
 #
 evs = events(url, start=start, end=end)
@@ -137,11 +137,15 @@ def draw_event(d, ev):
         """ We will be drawing events that last across more than one day separately for
         each day. """
         days_duration = (end.date() - start.date() + datetime.timedelta(days=1)).days
+        start_day = (start.date() - basetime.date()).days # the start day index on our calendar (starting at 0 for today)
+        #if start.date() < basetime.date(): # i.e. if event has started already
+            #days_duration = (end.date() - basetime.date() + datetime.timedelta(days=1)).days
+            #start_day = 0
+        print("days_duration: {}\nstart_day: {}".format(days_duration, start_day))
         # correct for events that end at midnight the next day
         if end.hour == 0 and end == 0:
             days_duration -= 1
-        start_day = (start - basetime).days # the start day index on our calendar (starting at 0 for today)
-        for day in range(start_day, start_day + days_duration):
+        for day in range(max(0, start_day), min(start_day + days_duration, DAYS)):
             event = {}
             if day == start_day: # first iteration - real start time
                 if start.hour >= END_DAY:
