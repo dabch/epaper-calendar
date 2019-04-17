@@ -51,7 +51,7 @@ def prepare_grid(d):
     # separate top bar from rest
     d.line([(offset_left, offset_top + bar_top - 1), (width, offset_top + bar_top - 1)], width=2)
     # separate all-day events from grid
-    d.line([(offset_left, offset_top + bar_top + offset_allday - 1), (width, offset_top + bar_top + offset_allday - 1)], width=2)
+    d.line([(offset_left, offset_top + bar_top + offset_allday), (width, offset_top + bar_top + offset_allday)], width=2)
     # separate the left bar from the rest
     d.line([(offset_left + bar_left -1, offset_top), (offset_left + bar_left - 1, height)], width=2)
 
@@ -82,7 +82,7 @@ def prepare_grid(d):
         d.text((offset_left, y + textoffs_y - 1), "%02d" % (BEGIN_DAY + i), font=fheadline)
 
     # clear the all-day events space
-    d.rectangle((offset_left + bar_left, offset_top + bar_left, width, offset_top + bar_left + offset_allday - 1), fill=200, width=0)
+    d.rectangle((offset_left + bar_left + 1, offset_top + bar_left + 1, width, offset_top + bar_left + offset_allday - 1), fill=200, width=0)
 
 def draw_short_event(d, e):
     """
@@ -125,15 +125,15 @@ def draw_allday_event(d, ev):
     """
     if e["column"] >= ALLDAY_MAX:
         return
-    x_start = offset_left + bar_left + e["start"] * per_day
+    x_start = offset_left + bar_left + e["start"] * per_day - 1
     x_end = offset_left + bar_left + (e["end"] + 1) * per_day
-    y_start = offset_top + bar_top + e["column"] * allday_size
+    y_start = offset_top + bar_top + e["column"] * allday_size - 1
     width = x_end - x_start
     
-    d.rectangle((x_start, y_start, x_end, y_start + allday_size), outline=0, fill=200, width=2)
+    d.rectangle((x_start, y_start, x_end, y_start + allday_size + 2), outline=0, fill=200, width=2)
 
     textoffs_x = 5
-    textoffs_y = (allday_size - text_size) // 2 - 1
+    textoffs_y = (allday_size - text_size) // 2
     fulltext = e["title"]
     while d.textsize(fulltext, font=ftext)[0] > width - 2 * textoffs_x:
         fulltext = fulltext[:-1]
