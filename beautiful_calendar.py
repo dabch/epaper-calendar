@@ -126,7 +126,7 @@ def draw_allday_event(d, ev):
     if e["column"] >= ALLDAY_MAX:
         return
     x_start = offset_left + bar_left + e["start"] * per_day - 1
-    x_end = offset_left + bar_left + (e["end"] + 1) * per_day
+    x_end = offset_left + bar_left + e["end"] * per_day
     y_start = offset_top + bar_top + e["column"] * allday_size - 1
     width = x_end - x_start
     

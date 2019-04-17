@@ -34,7 +34,8 @@ def detect_collisions(drawables, base, max_):
     indexes = [0] * (max_ - base + 1)
     for e in drawables:
         e["column"] = 0
-        for minute in range(e["start"], e["end"] + 1):
+        for minute in range(e["start"], e["end"]):
+            print("event {}: {}, range {} to {}".format(e["title"], minute - base, e["start"] - base, e["end"]- base))
             histo[minute - base].append(e)
             e["column"] = max(e["column"], indexes[minute - base])
             indexes[minute - base] += 1
@@ -57,7 +58,7 @@ def split_events(evs):
         if ev.all_day:
             event = {}
             event["start"] = max((start.date() - basetime.date()).days, 0)
-            event["end"] = min((end.date() - basetime.date()).days - 1, DAYS - 1)
+            event["end"] = min((end.date() - basetime.date()).days, DAYS)
             event["title"] = ev.summary
             all_days.append(event)
         else:
@@ -136,7 +137,7 @@ def get_drawable_events():
     (drawables, all_days) = split_events(evs)
     drawables_new = []
     for d in drawables:
-        drawables_new.append(detect_collisions(d, BEGIN_DAY * 60, hours_day * 60))
+        drawables_new.append(detect_collisions(d, BEGIN_DAY * 60, END_DAY * 60))
 
     all_days = detect_collisions(all_days, 0, DAYS)
 
