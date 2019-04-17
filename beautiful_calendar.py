@@ -7,31 +7,11 @@ import epd7in5
 from PIL import Image, ImageDraw, ImageFont
 
 import ical_worker
+from config import *
 
-BEGIN_DAY = 8
-END_DAY = 24
-DAYS = 4
-TIMEZONE = 'Europe/Berlin'
-ALLDAY_MAX = 2
-
-width = epd7in5.EPD_WIDTH 
-height = epd7in5.EPD_HEIGHT
 #timezone = pytz.timezone(TIMEZONE)
 #ical_worker.basetime = datetime.datetime.now(timezone)
 #ical_worker.basetime.astimezone(timezone)
-
-offset_top = 0 
-offset_left = 0
-bar_top = 20
-bar_left = 20
-allday_size = 15
-offset_allday = ALLDAY_MAX * allday_size
-hours_day = END_DAY - BEGIN_DAY
-per_hour = math.floor((height - bar_top - offset_top - offset_allday) / hours_day)
-per_day = math.floor((width - bar_left - offset_left) / DAYS)
-
-headline_size = 15
-text_size = 12
 
 fheadline = ImageFont.truetype('/usr/share/fonts/truetype/lato/Lato-Light.ttf', headline_size)
 ftext = ImageFont.truetype('/usr/share/fonts/truetype/lato/Lato-Light.ttf', text_size)

@@ -2,14 +2,14 @@ from icalevents.icalevents import events
 import datetime
 import pytz # timezone
 import configparser
-from beautiful_calendar import BEGIN_DAY, END_DAY, hours_day, DAYS
+from config import *
 
 TIMEZONE= "Europe/Berlin"
 
 
 timezone = pytz.timezone(TIMEZONE)
-#basetime = datetime.datetime.strptime("Apr 23 2019 01:15AM", '%b %d %Y %I:%M%p').replace(tzinfo=timezone)
-basetime = datetime.datetime.now(timezone)
+basetime = datetime.datetime.strptime("Apr 23 2019 01:15AM", '%b %d %Y %I:%M%p').replace(tzinfo=timezone)
+#basetime = datetime.datetime.now(timezone)
 basetime.astimezone(timezone)
 
 conf = configparser.ConfigParser()
@@ -155,10 +155,13 @@ def split_events(evs):
     return (drawables, all_days)  
 
 def get_drawable_events():
-    evs = events(url, start=start, end=end)
-    print("Got {} events".format(len(evs)))
-    evs.sort()
-    (drawables, all_days) = split_events(evs)
+    all_events = []
+    for url in URLS:
+        evs = events(url, start=start, end=end)
+        all_events.extend(evs)
+    print("Got {} events".format(len(all_events)))
+    all_events.sort()
+    (drawables, all_days) = split_events(all_events)
     drawables_new = []
     for d in drawables:
         drawables_new.append(detect_collisions(d, BEGIN_DAY * 60, END_DAY * 60))
