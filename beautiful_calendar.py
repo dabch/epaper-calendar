@@ -110,7 +110,11 @@ def draw_short_event(d, e):
     if e["end"] - e["start"] >= 90:
         begintext = "%02d:%02d" % (e["start"] // 60, e["start"] % 60)
         endtext = "%02d:%02d" % (e["end"] // 60, e["end"] % 60)
-        fulltext += "\n%s-%s" % (begintext, endtext)
+        datetext = "\n%s-%s" % (begintext, endtext)
+        if d.textsize(datetext, font=ftext)[0] > width - 2 * textoffs_x:
+           datetext = "\n%s" % begintext
+        if d.textsize(datetext, font=ftext)[0] <= width - 2 * textoffs_x:
+            fulltext += datetext
     d.text((x_start + textoffs_x, y_start + textoffs_y), fulltext, font=ftext) 
     print(fulltext)
     #d.text((x_start + 5, y_start + text_size + textoffs_y), begintext + "-" + endtext, font=ftext) 
