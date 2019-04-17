@@ -30,23 +30,21 @@ def detect_collisions(drawables, base, max_):
     list of events with two parameters added to each event: index to be drawn in and
     number of events at that point. """ 
 
-    base = BEGIN_DAY * 60 
-    for day in drawables:
-        histo = [[] for x in range(max_ - base)]
-        indexes = [0] * (max_ - base)
-        for e in day:
-            e["column"] = 0
-            for minute in range(e["start"], e["end"]):
-                histo[minute - base].append(e)
-                e["column"] = max(e["column"], indexes[minute - base])
-                indexes[minute - base] += 1
+    histo = [[] for x in range(max_ - base + 1)]
+    indexes = [0] * (max_ - base + 1)
+    for e in drawables:
+        e["column"] = 0
+        for minute in range(e["start"], e["end"] + 1):
+            histo[minute - base].append(e)
+            e["column"] = max(e["column"], indexes[minute - base])
+            indexes[minute - base] += 1
 
-        for e in day:
-            max_collision = 1 # max events in parallel - no collisions = 1
-            for minute in range(e["start"], e["end"]):
-                max_collision = max(max_collision, len(histo[minute - base]))
-            e["max_collision"] = max_collision
-            print("{}: {}, {}".format(e["title"], max_collision, e["column"]))
+    for e in drawables:
+        max_collision = 1 # max events in parallel - no collisions = 1
+        for minute in range(e["start"], e["end"]):
+            max_collision = max(max_collision, len(histo[minute - base]))
+        e["max_collision"] = max_collision
+        print("{}: {}, {}".format(e["title"], max_collision, e["column"]))
     return drawables
 
 
@@ -57,8 +55,11 @@ def split_events(evs):
         start = ev.start.astimezone(timezone)
         end = ev.end.astimezone(timezone)
         if ev.all_day:
-            # TODO draw_allday_event(d, ev)
-            pass
+            event = {}
+            event["start"] = max((start.date() - basetime.date()).days, 0)
+            event["end"] = min((end.date() - basetime.date()).days - 1, DAYS - 1)
+            event["title"] = ev.summary
+            all_days.append(event)
         else:
             """ We will be drawing events that last across more than one day separately for
             each day. 
@@ -133,7 +134,11 @@ def get_drawable_events():
     print("Got {} events".format(len(evs)))
     evs.sort()
     (drawables, all_days) = split_events(evs)
-    drawables = detect_collisions(drawables, BEGIN_DAY * 60, hours_day * 60)
+    drawables_new = []
+    for d in drawables:
+        drawables_new.append(detect_collisions(d, BEGIN_DAY * 60, hours_day * 60))
+
+    all_days = detect_collisions(all_days, 0, DAYS)
 
     return (drawables, all_days)
 
