@@ -105,7 +105,7 @@ def draw_short_event(d, e):
     textoffs_y = (per_hour - text_size) // 2 - 1
     
     fulltext = e["title"]
-    while d.textsize(fulltext, font=ftext)[0] > width - 2 * textoffs_x:
+    while d.textsize(fulltext, font=ftext)[0] > width - 2 * textoffs_x and len(fulltext) > 0:
         fulltext = fulltext[:-1]
     if e["end"] - e["start"] >= 90:
         begintext = "%02d:%02d" % (e["start"] // 60, e["start"] % 60)
@@ -139,7 +139,7 @@ def draw_allday_event(d, ev):
     textoffs_x = 5
     textoffs_y = (allday_size - text_size) // 2
     fulltext = e["title"]
-    while d.textsize(fulltext, font=ftext)[0] > width - 2 * textoffs_x:
+    while d.textsize(fulltext, font=ftext)[0] > width - 2 * textoffs_x and len(fulltext) > 0:
         fulltext = fulltext[:-1]
     d.text((x_start + textoffs_x, y_start + textoffs_y), fulltext, font=ftext)
     
