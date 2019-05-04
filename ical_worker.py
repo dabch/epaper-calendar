@@ -8,15 +8,9 @@ TIMEZONE= "Europe/Berlin"
 
 
 timezone = pytz.timezone(TIMEZONE)
-basetime = datetime.datetime.strptime("Apr 23 2019 01:15AM", '%b %d %Y %I:%M%p').replace(tzinfo=timezone)
-#basetime = datetime.datetime.now(timezone)
+#basetime = datetime.datetime.strptime("Apr 23 2019 01:15AM", '%b %d %Y %I:%M%p').replace(tzinfo=timezone)
+basetime = datetime.datetime.now(timezone)
 basetime.astimezone(timezone)
-
-conf = configparser.ConfigParser()
-conf.read("config.ini")
-
-url = conf['DEFAULT']['URL']
-
 
 start = basetime.replace(hour=BEGIN_DAY,minute=0)
 print(start)
@@ -70,7 +64,7 @@ def detect_collisions(drawables, base, max_):
                 e["max_collision"] = len(matrix)
                 e["column"] = i
 
-    print("MATRIX: {}".format(matrix))
+#    print("MATRIX: {}".format(matrix))
     return drawables
     
 def split_events(evs):
